@@ -1,0 +1,5 @@
+rmq-url = "http://localhost:15672"
+rmq-user = "guest"
+rmq-password = "guest"
+statsd = "127.0.0.1:8125"
+update-interval = 30

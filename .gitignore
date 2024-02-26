@@ -1,0 +1,5 @@
+.vscode
+/rmq-statsd
+/nimbledeps
+/rmq-statsd.ini
+/slim.report.json
