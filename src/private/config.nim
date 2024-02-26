@@ -38,7 +38,7 @@ proc initConfig(
 
 proc readConfig*(): AMQPStatsdConfig =
   try:
-    let conf = loadConfig("rmq_statsd.ini")
+    let conf = loadConfig("rmq-statsd.ini")
     result = initConfig(
       rmqURL = conf.getSectionValue("", "rmq-url", "http://localhost:15672"),
       rmqUser = conf.getSectionValue("", "rmq-user", "guest"),
