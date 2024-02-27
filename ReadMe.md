@@ -31,11 +31,17 @@ management plugin API.
     - redeliver_details.rate
     - publish
     - publish_details.rate
+    - deliver_no_ack
+    - deliver_no_ack_details.rate
 - nodes (for each node)
   - mem_used
   - fd_used
   - sockets_used
   - disk_free
+- queues (if queue_totals disabled)
+  - messages
+  - messages_ready
+  - messages_unacknowledged
 
 ## Configuring the daemon
 Daemon is supporting the ini format config.

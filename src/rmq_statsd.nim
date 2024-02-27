@@ -26,6 +26,7 @@ proc onTimerEvent() {.async.} =
   try:
     let overview = await self.statsM.overview()
     let nodes = await self.statsM.nodes()
+    
     try:
       await self.statsDM.gauge("rabbitmq." & overview.node & ".channels", overview.objectTotals.channels)
       await self.statsDM.gauge("rabbitmq." & overview.node & ".queues", overview.objectTotals.queues)
@@ -37,6 +38,18 @@ proc onTimerEvent() {.async.} =
         await self.statsDM.gauge("rabbitmq." & overview.node & ".messages.messages", overview.queueTotals.messages.get(0))
         await self.statsDM.gauge("rabbitmq." & overview.node & ".messages.ready", overview.queueTotals.messagesReady.get(0))
         await self.statsDM.gauge("rabbitmq." & overview.node & ".messages.unack", overview.queueTotals.messagesUnacknowledged.get(0))
+      else:
+        let queues = await self.statsM.queues()
+        var messages: int = 0
+        var messagesReady: int = 0
+        var messagesUnack: int = 0
+        for queue in queues:
+          messages.inc(queue.messages.get(0))
+          messagesReady.inc(queue.messagesReady.get(0))
+          messagesUnack.inc(queue.messagesUnacknowledged.get(0))
+        await self.statsDM.gauge("rabbitmq." & overview.node & ".messages.messages", messages)
+        await self.statsDM.gauge("rabbitmq." & overview.node & ".messages.ready", messagesReady)
+        await self.statsDM.gauge("rabbitmq." & overview.node & ".messages.unack", messagesUnack)
 
       if overview.messageStats.isSome:
         let ms = overview.messageStats.get
@@ -48,14 +61,14 @@ proc onTimerEvent() {.async.} =
         await self.statsDM.gauge("rabbitmq." & overview.node & ".messages.get_rate", ms.getDetails.rate)
         await self.statsDM.gauge("rabbitmq." & overview.node & ".messages.redeliver", ms.redeliver)
         await self.statsDM.gauge("rabbitmq." & overview.node & ".messages.redeliver_rate", ms.redeliverDetails.rate)
-        
         await self.statsDM.gauge("rabbitmq." & overview.node & ".messages.publish", ms.publish.get(0))
         await self.statsDM.gauge("rabbitmq." & overview.node & ".messages.publish_rate", (
           if ms.publishDetails.isSome(): ms.publishDetails.get().rate
           else: 0.0
         ))
+        await self.statsDM.gauge("rabbitmq." & overview.node & ".messages.deliver_noack", ms.deliverNoAck)
+        await self.statsDM.gauge("rabbitmq." & overview.node & ".messages.deliver_noack_rate", ms.deliverNoAckDetails.rate)
         
-
       for node in nodes:
         await self.statsDM.gauge("rabbitmq." & node.name & ".mem_used", node.memUsed)
         await self.statsDM.gauge("rabbitmq." & node.name & ".fd_used", node.fdUsed)
