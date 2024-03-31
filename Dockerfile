@@ -8,7 +8,7 @@ WORKDIR /projects/
 ENV PATH="/root/.nimble/bin:$PATH"
 COPY rmq_statsd.* ./
 COPY src ./src
-RUN nimble -y build -d:release -l:"-flto" -t:"-flto" --opt:size --threads:on
+RUN nimble -y build -d:release
 RUN objcopy --strip-all -R .comment -R .comments rmq-statsd
 
 

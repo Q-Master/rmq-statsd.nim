@@ -53,21 +53,40 @@ proc onTimerEvent() =
 
       if overview.messageStats.isSome:
         let ms = overview.messageStats.get
-        self.statsDM.gauge("rabbitmq." & overview.node & ".messages.ack", ms.ack)
-        self.statsDM.gauge("rabbitmq." & overview.node & ".messages.ack_rate", ms.ackDetails.rate)
-        self.statsDM.gauge("rabbitmq." & overview.node & ".messages.deliver", ms.deliver)
-        self.statsDM.gauge("rabbitmq." & overview.node & ".messages.deliver_rate", ms.deliverDetails.rate)
-        self.statsDM.gauge("rabbitmq." & overview.node & ".messages.get", ms.get)
-        self.statsDM.gauge("rabbitmq." & overview.node & ".messages.get_rate", ms.getDetails.rate)
-        self.statsDM.gauge("rabbitmq." & overview.node & ".messages.redeliver", ms.redeliver)
-        self.statsDM.gauge("rabbitmq." & overview.node & ".messages.redeliver_rate", ms.redeliverDetails.rate)
+        self.statsDM.gauge("rabbitmq." & overview.node & ".messages.ack", ms.ack.get(0))
+        self.statsDM.gauge("rabbitmq." & overview.node & ".messages.ack_rate", (
+          if ms.ackDetails.isSome(): ms.ackDetails.get().rate
+          else: 0.0
+        ))
+        self.statsDM.gauge("rabbitmq." & overview.node & ".messages.deliver", ms.deliver.get(0))
+        self.statsDM.gauge("rabbitmq." & overview.node & ".messages.deliver_rate", 
+        (
+          if ms.deliverDetails.isSome(): ms.deliverDetails.get().rate
+          else: 0.0
+        ))
+        self.statsDM.gauge("rabbitmq." & overview.node & ".messages.get", ms.get.get(0))
+        self.statsDM.gauge("rabbitmq." & overview.node & ".messages.get_rate", 
+        (
+          if ms.getDetails.isSome(): ms.getDetails.get().rate
+          else: 0.0
+        ))
+        self.statsDM.gauge("rabbitmq." & overview.node & ".messages.redeliver", ms.redeliver.get(0))
+        self.statsDM.gauge("rabbitmq." & overview.node & ".messages.redeliver_rate", 
+        (
+          if ms.redeliverDetails.isSome(): ms.redeliverDetails.get().rate
+          else: 0.0
+        ))
         self.statsDM.gauge("rabbitmq." & overview.node & ".messages.publish", ms.publish.get(0))
         self.statsDM.gauge("rabbitmq." & overview.node & ".messages.publish_rate", (
           if ms.publishDetails.isSome(): ms.publishDetails.get().rate
           else: 0.0
         ))
-        self.statsDM.gauge("rabbitmq." & overview.node & ".messages.deliver_noack", ms.deliverNoAck)
-        self.statsDM.gauge("rabbitmq." & overview.node & ".messages.deliver_noack_rate", ms.deliverNoAckDetails.rate)
+        self.statsDM.gauge("rabbitmq." & overview.node & ".messages.deliver_noack", ms.deliverNoAck.get(0))
+        self.statsDM.gauge("rabbitmq." & overview.node & ".messages.deliver_noack_rate", 
+        (
+          if ms.deliverNoAckDetails.isSome(): ms.deliverNoAckDetails.get().rate
+          else: 0.0
+        ))
         
       for node in nodes:
         self.statsDM.gauge("rabbitmq." & node.name & ".mem_used", node.memUsed)
