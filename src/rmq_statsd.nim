@@ -1,6 +1,7 @@
 import std/[exitprocs, options, os]
 import amqpstats, simplestatsdclient
 import private/config
+import amqpstats/types
 
 
 const SLEEP_TIME = 500
@@ -21,11 +22,14 @@ proc atExit() {.noconv.} =
   running = false
   echo "Stopping application"
 
+var overview: Overview
+var nodes: seq[Node]
+var queues: seq[Queue]
 
 proc onTimerEvent() =
   try:
-    let overview = self.statsM.overview()
-    let nodes = self.statsM.nodes()
+    overview = self.statsM.overview()
+    nodes = self.statsM.nodes()
     
     try:
       self.statsDM.gauge("rabbitmq." & overview.node & ".channels", overview.objectTotals.channels)
@@ -39,7 +43,7 @@ proc onTimerEvent() =
         self.statsDM.gauge("rabbitmq." & overview.node & ".messages.ready", overview.queueTotals.messagesReady.get(0))
         self.statsDM.gauge("rabbitmq." & overview.node & ".messages.unack", overview.queueTotals.messagesUnacknowledged.get(0))
       else:
-        let queues = self.statsM.queues()
+        queues = self.statsM.queues()
         var messages: int = 0
         var messagesReady: int = 0
         var messagesUnack: int = 0
