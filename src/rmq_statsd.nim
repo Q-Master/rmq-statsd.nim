@@ -23,13 +23,10 @@ proc atExit() {.noconv.} =
   echo "Stopping application"
 
 var overview: Overview
-var nodes: seq[Node]
-var queues: seq[Queue]
 
 proc onTimerEvent() =
   try:
     overview = self.statsM.overview()
-    nodes = self.statsM.nodes()
     
     try:
       self.statsDM.gauge("rabbitmq." & overview.node & ".channels", overview.objectTotals.channels)
@@ -43,11 +40,10 @@ proc onTimerEvent() =
         self.statsDM.gauge("rabbitmq." & overview.node & ".messages.ready", overview.queueTotals.messagesReady.get(0))
         self.statsDM.gauge("rabbitmq." & overview.node & ".messages.unack", overview.queueTotals.messagesUnacknowledged.get(0))
       else:
-        queues = self.statsM.queues()
         var messages: int = 0
         var messagesReady: int = 0
         var messagesUnack: int = 0
-        for queue in queues:
+        for queue in self.statsM.queuesIt:
           messages.inc(queue.messages.get(0))
           messagesReady.inc(queue.messagesReady.get(0))
           messagesUnack.inc(queue.messagesUnacknowledged.get(0))
@@ -92,7 +88,7 @@ proc onTimerEvent() =
           else: 0.0
         ))
         
-      for node in nodes:
+      for node in self.statsM.nodesIt:
         self.statsDM.gauge("rabbitmq." & node.name & ".mem_used", node.memUsed)
         self.statsDM.gauge("rabbitmq." & node.name & ".fd_used", node.fdUsed)
         self.statsDM.gauge("rabbitmq." & node.name & ".sockets_used", node.socketsUsed)
