@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.2.1"
+version       = "0.2.2"
 author        = "Vladimir Berezenko"
 description   = "Pure nim rabbitmq to statsd metrics pusher"
 license       = "MIT"
@@ -10,5 +10,5 @@ namedBin["rmq_statsd"] = "rmq-statsd"
 # Dependencies
 
 requires "nim >= 2.0.0"
-requires "amqpstats >= 0.2.0"
+requires "amqpstats >= 0.2.2"
 requires "simplestatsdclient >= 0.2.0"
